@@ -1,22 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AddTodo from "./components/AddTodo/AddTodo.jsx";
 import TodoList from "./components/TodoList/TodoList.jsx";
 import TodoContext from "./context/TodoContext.js";
-
+import './App.css';
 
 function App() {
-  const [list, setList] = useState([
-    { id: 1, todoData: 'todo 1',finished:false },
-    { id: 2, todoData: 'todo 2' ,finished:true},
-  ]);
+  // Load saved todos from localStorage
+  const savedTodos = JSON.parse(localStorage.getItem("todoList")) || [];
+  const [list, setList] = useState(savedTodos);
+
+  // Save to localStorage whenever the list changes
+  useEffect(() => {
+    localStorage.setItem("todoList", JSON.stringify(list));
+  }, [list]);
+
+  const updateList = (todo) => {
+    if (todo.trim() !== "") {
+      setList((prevList) => [
+        ...prevList,
+        {
+          id: prevList.length + 1,
+          todoData: todo,
+          finished: false,
+        },
+      ]);
+    }
+  };
+
   return (
-    <TodoContext.Provider value ={{list,setList}}>
-      <AddTodo updateList ={(todo)=> setList([...list,
-      {id:list.length + 1,
-       todoData:todo 
-       ,finished:false
-       }])} />
-      <TodoList  />
+    <TodoContext.Provider value={{ list, setList }}>
+      <h1 className="app-heading">Todo App ✅</h1>
+      <AddTodo updateList={updateList} />
+      <TodoList />
     </TodoContext.Provider>
   );
 }
